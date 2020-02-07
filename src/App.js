@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import {Line} from "react-chartjs-2";
+import { PureComponent } from 'react';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+} from 'recharts';
 import './App.css';
 
 class App extends React.Component{
@@ -8,12 +11,10 @@ class App extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      labels:[],
-      datasets:[{
         data:[]
-      }]
+      }
     }
-  }
+
 
   
   refineData(data){
@@ -25,8 +26,12 @@ class App extends React.Component{
       //creating an array of stock price
       updates:function arrayfy(data){
         for(let i in data["Time Series (Daily)"]){
-          this.dataArray.push(data["Time Series (Daily)"][i]["2. high"]);
-          this.labelArray.push(i);
+          this.dataArray.push({
+            date:i,
+            High:data["Time Series (Daily)"][i]["2. high"],
+        Low:data["Time Series (Daily)"][i]["3. low"],
+      Open:data["Time Series (Daily)"][i]["1. open"],
+       Close:data["Time Series (Daily)"][i]["4. high"] });
           
           } 
           // for(let j in data["Time Series (Daily)"][0]){
@@ -34,16 +39,16 @@ class App extends React.Component{
           
           // }
           
-          console.log(this.labelArray);
+          console.log(this.dataArray);
         }
       }
       obj.updates(data);
       console.log(obj.dataArray);
       // console.log(obj.labelArray);
 
-      this.setState({labels:obj.labelArray,
-        datasets:[{data:obj.dataArray}]});//this.dataArray}]});
-      console.log(this.state);
+      this.setState({
+        data:obj.dataArray});//this.dataArray}]});
+      console.log(this.state.data);
       return obj;
   }
   //api call
@@ -59,7 +64,24 @@ class App extends React.Component{
   render(){
     return (
       <div className="App">
-        <Line data = {this.state}/>
+        <LineChart
+        width={1200}
+        height={800}
+        data={this.state.data}
+        margin={{
+          top: 5, right: 30, left: 20, bottom: 5,
+        }}>
+        <CartesianGrid strokeDasharray="30 30" />
+        <XAxis dataKey="date" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Line type="monotone" dataKey="High" stroke="#8884d8" activeDot={{ r: 80 }} />
+        <Line type="monotone" dataKey="Low" stroke="#82b419" />
+        <Line type="monotone" dataKey="Open" stroke="#bbbbc5" />
+        <Line type="monotone" dataKey="Close" stroke="#289a11" />
+        {console.log(this.state.data.High)};
+      </LineChart>
         <button onClick = {()=>this.getData()}>click me</button>
       </div>
     );
